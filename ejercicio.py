@@ -2,9 +2,8 @@ import streamlit as st
 
 st.set_page_config(page_title="Conversor de temperatura")
 
-st.title("Conversor de temperatura")
-
-unidades = ["Celsius", "Fahrenheit", "Kelvin"]
+UNIDADES = ["Celsius", "Fahrenheit", "Kelvin"]
+SIMBOLOS = {"Celsius": "C", "Fahrenheit": "F", "Kelvin": "K"}
 
 
 def a_celsius(valor, unidad):
@@ -23,23 +22,57 @@ def desde_celsius(valor, unidad):
     return valor + 273.15
 
 
-col1, col2 = st.columns(2)
-with col1:
-    origen = st.selectbox("Unidad de origen", unidades, index=0)
-with col2:
-    destino = st.selectbox("Unidad de destino", unidades, index=1)
+st.session_state.setdefault("origen", "Celsius")
+st.session_state.setdefault("destino", "Fahrenheit")
+st.session_state.setdefault("valor", 0.0)
 
-valor = st.number_input("Temperatura", value=0.0, step=0.1, format="%.2f")
+
+def intercambiar():
+    st.session_state.origen, st.session_state.destino = (
+        st.session_state.destino,
+        st.session_state.origen,
+    )
+
+
+def restablecer():
+    st.session_state.origen = "Celsius"
+    st.session_state.destino = "Fahrenheit"
+    st.session_state.valor = 0.0
+
+
+st.title("Conversor de temperatura")
+st.caption("Convierte entre Celsius, Fahrenheit y Kelvin.")
+
+col1, col2, col3 = st.columns([5, 2, 5])
+with col1:
+    st.selectbox("Unidad de origen", UNIDADES, key="origen")
+with col2:
+    st.write("")
+    st.write("")
+    st.button("Intercambiar", on_click=intercambiar, use_container_width=True)
+with col3:
+    st.selectbox("Unidad de destino", UNIDADES, key="destino")
+
+st.number_input("Temperatura", step=0.1, format="%.2f", key="valor")
+
+origen = st.session_state.origen
+destino = st.session_state.destino
+valor = st.session_state.valor
 
 celsius = a_celsius(valor, origen)
 
-if celsius < -273.15:
+if round(celsius, 9) < -273.15:
     st.error("La temperatura ingresada esta por debajo del cero absoluto.")
 else:
     resultado = desde_celsius(celsius, destino)
-    st.subheader("Resultado")
-    st.write(f"{valor:.2f} {origen} = {resultado:.2f} {destino}")
+
+    st.metric(
+        label=f"{valor:.2f} {origen}",
+        value=f"{resultado:.2f} {SIMBOLOS[destino]}",
+    )
 
     with st.expander("Ver todas las conversiones"):
-        for u in unidades:
-            st.write(f"{u}: {desde_celsius(celsius, u):.2f}")
+        for u in UNIDADES:
+            st.write(f"{u}: {desde_celsius(celsius, u):.2f} {SIMBOLOS[u]}")
+
+st.button("Restablecer", on_click=restablecer)
