@@ -1,58 +1,45 @@
 import streamlit as st
 
-st.set_page_config(
-    page_title="Mi primera app",
-    page_icon="🚀",
-    layout="centered"
-)
+st.set_page_config(page_title="Conversor de temperatura")
 
-st.title("🚀 Mi primera aplicación")
-st.write("Bienvenido a mi aplicación desplegada con Streamlit.")
+st.title("Conversor de temperatura")
 
-st.divider()
+unidades = ["Celsius", "Fahrenheit", "Kelvin"]
 
-# Formulario
-st.subheader("Formulario de usuario")
 
-nombre = st.text_input("¿Cómo te llamas?")
-edad = st.number_input(
-    "¿Cuántos años tienes?",
-    min_value=0,
-    max_value=120,
-    value=18
-)
+def a_celsius(valor, unidad):
+    if unidad == "Celsius":
+        return valor
+    if unidad == "Fahrenheit":
+        return (valor - 32) * 5 / 9
+    return valor - 273.15
 
-if st.button("Enviar"):
-    if nombre.strip():
-        st.success(f"¡Hola, {nombre}!")
-        st.write(f"Tu edad es: {edad} años.")
-    else:
-        st.warning("Por favor, introduce tu nombre.")
 
-st.divider()
+def desde_celsius(valor, unidad):
+    if unidad == "Celsius":
+        return valor
+    if unidad == "Fahrenheit":
+        return valor * 9 / 5 + 32
+    return valor + 273.15
 
-# Calculadora
-st.subheader("Calculadora")
 
-a = st.number_input("Primer número", value=10.0)
-b = st.number_input("Segundo número", value=5.0)
+col1, col2 = st.columns(2)
+with col1:
+    origen = st.selectbox("Unidad de origen", unidades, index=0)
+with col2:
+    destino = st.selectbox("Unidad de destino", unidades, index=1)
 
-operacion = st.selectbox(
-    "Operación",
-    ["Suma", "Resta", "Multiplicación", "División"]
-)
+valor = st.number_input("Temperatura", value=0.0, step=0.1, format="%.2f")
 
-if st.button("Calcular"):
-    if operacion == "Suma":
-        resultado = a + b
-    elif operacion == "Resta":
-        resultado = a - b
-    elif operacion == "Multiplicación":
-        resultado = a * b
-    else:
-        resultado = a / b if b != 0 else None
+celsius = a_celsius(valor, origen)
 
-    if resultado is None:
-        st.error("No se puede dividir entre cero.")
-    else:
-        st.metric("Resultado", resultado)
+if celsius < -273.15:
+    st.error("La temperatura ingresada esta por debajo del cero absoluto.")
+else:
+    resultado = desde_celsius(celsius, destino)
+    st.subheader("Resultado")
+    st.write(f"{valor:.2f} {origen} = {resultado:.2f} {destino}")
+
+    with st.expander("Ver todas las conversiones"):
+        for u in unidades:
+            st.write(f"{u}: {desde_celsius(celsius, u):.2f}")
