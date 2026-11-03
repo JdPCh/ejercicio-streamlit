@@ -33,13 +33,6 @@ def intercambiar():
         st.session_state.origen,
     )
 
-
-def restablecer():
-    st.session_state.origen = "Celsius"
-    st.session_state.destino = "Fahrenheit"
-    st.session_state.valor = 0.0
-
-
 st.title("Conversor de temperatura")
 st.caption("Convierte entre Celsius, Fahrenheit y Kelvin.")
 
@@ -74,5 +67,3 @@ else:
     with st.expander("Ver todas las conversiones"):
         for u in UNIDADES:
             st.write(f"{u}: {desde_celsius(celsius, u):.2f} {SIMBOLOS[u]}")
-
-st.button("Restablecer", on_click=restablecer)
